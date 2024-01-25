@@ -1,0 +1,44 @@
+﻿@page "/agregarlibro"
+@using CommandBlazorApp.Components.Commands
+@using CommandBlazorApp.Models
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<AppDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<h3>Agregar libro</h3>
+
+<EditForm Model="@libro" OnValidSubmit="HandleValidSubmit" FormName="AgregarForm">
+    <div>
+        <label for="Titulo">Título:</label>
+        <InputText id="Titulo" @bind-Value="libro.Titulo" @bind-Value:event="oninput" />
+    </div>
+    <div>
+        <label for="Autor">Autor:</label>
+        <InputText id="Autor" @bind-Value="libro.Autor" @bind-Value:event="oninput" />
+
+    </div>
+    <button type="submit">Agregar libro</button>
+</EditForm>
+
+
+@code {
+    private Libro libro = new Libro();
+
+    private void HandleValidSubmit()
+    {
+        using (var dbContext = DbFactory.CreateDbContext())
+        {
+            Libro libroACrear = new Libro
+                {
+                    Titulo = libro.Titulo,
+                    Autor = libro.Autor
+                };
+            var command = new AgregarLibroCommand(libroACrear, dbContext);
+            command.Execute();
+            // Redirige al usuario a la lista de libros
+            NavigationManager.NavigateTo("/libros");
+        }
+    }
+}
+
+

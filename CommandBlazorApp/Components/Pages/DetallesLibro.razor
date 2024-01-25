@@ -1,0 +1,62 @@
+﻿@page "/detalleslibro/{Id}"
+@using CommandBlazorApp.Components.Commands
+@using CommandBlazorApp.Models
+@using Microsoft.EntityFrameworkCore
+@inject AppDbContext dbContext
+@inject NavigationManager NavigationManager
+
+<h3>Detalles del libro</h3>
+
+<p>@libro.Titulo por @libro.Autor</p>
+
+<EditForm Model="@libro" OnValidSubmit="HandleValidSubmit" FormName="EditarForm">
+    <div>
+        <label for="titulo">Título:</label>
+        <InputText id="titulo" @bind-Value="libro.Titulo" @bind-Value:event="oninput" />
+    </div>
+    <div>
+        <label for="autor">Autor:</label>
+        <InputText id="autor" @bind-Value="libro.Autor" @bind-Value:event="oninput" />
+    </div>
+    <button type="submit">Actualizar libro</button>
+</EditForm>
+
+
+<button @onclick="EliminarLibro">Eliminar libro</button>
+
+@code {
+    private Libro libro;
+
+    [Parameter]
+    public string Id { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        libro = dbContext.Libros.Find(int.Parse(Id));
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        dbContext.Libros.Attach(libro);
+        dbContext.Entry(libro).State = EntityState.Modified;
+
+        var command = new EditarLibroCommand(libro, dbContext);
+        command.Execute();
+        // Redirige al usuario a la lista de libros
+        NavigationManager.NavigateTo("/libros");
+    }
+
+    private void EliminarLibro()
+    {
+        var libroABorrar = dbContext.Libros.Find(libro.Id);
+        if (libroABorrar != null)
+        {
+            var command = new BorrarLibroCommand(libroABorrar, dbContext);
+            command.Execute();
+            // Redirige al usuario a la lista de libros
+            NavigationManager.NavigateTo("/libros");
+        }
+    }
+
+}
+

@@ -1,0 +1,12 @@
+﻿@page "/libros"
+@inject AppDbContext dbContext
+
+<h3>Lista de libros</h3>
+
+<ul>
+    @foreach (var libro in dbContext.Libros)
+    {
+        <li><a href="/detalleslibro/@libro.Id">@libro.Titulo por @libro.Autor</a></li>
+    }
+</ul>
+
